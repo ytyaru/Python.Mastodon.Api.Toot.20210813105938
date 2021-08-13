@@ -11,23 +11,19 @@ from lib import exept_null, Path, FileReader, FileWriter, Authenticator, Api
 import unittest
 from unittest.mock import MagicMock, patch, mock_open
 import copy
-class TestFileReader(unittest.TestCase):
+class TestFileWriter(unittest.TestCase):
     def test_text(self):
-#        DummyReader = copy.deepcopy(FileReader)
-#        test_data = 'test-data'
-#        DummyReader.text = MagicMock(return_value=test_data) 
-#        self.assertEqual(DummyReader.text(), test_data)
         test_data = 'トゥート本文。\n#mastodon #api'
-        mock_io = mock_open(read_data=test_data)
-        # openは組み込み関数なので、「builtins」を使う
+        mock_io = mock_open()
         with patch('builtins.open', mock_io):
-            mock_io.assert_called_once_with('/tmp/dummy.txt', mode='r')
-            self.assertEqual(FileReader.text('dummy.txt'), ['トゥート本文。\n', '#mastodon #api\n'])
+            actual = FileWriter.text('/tmp/dummy.txt', test_data)
+            mock_io.assert_called_once_with('/tmp/dummy.txt', mode='w', encoding='utf-8')
     def test_json(self):
-        DummyReader = copy.deepcopy(FileReader)
-        test_data = {"id": "1234"}
-        DummyReader.json = MagicMock(return_value=test_data) 
-        self.assertEqual(DummyReader.json(), test_data)
+        test_data = '{"id": "1234"}'
+        mock_io = mock_open()
+        with patch('builtins.open', mock_io):
+            actual = FileWriter.json('/tmp/dummy.json', test_data)
+            mock_io.assert_called_once_with('/tmp/dummy.json', mode='w', encoding='utf-8')
 
 if __name__ == "__main__":
     unittest.main()
