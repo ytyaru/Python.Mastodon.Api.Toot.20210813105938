@@ -16,8 +16,12 @@ class TestAuthenticator(unittest.TestCase):
         test_data = 'xxxxxxxxxxxxxxxxxxxxxxxxxxxx'
         mock_io = mock_open(read_data=test_data)
         with patch('builtins.open', mock_io):
-            actual = FileReader.text('/tmp/token.txt')
-            mock_io.assert_called_once_with('/tmp/token.txt', mode='r', encoding='utf-8')
+            actual = Authenticator().Token
+            parent = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+            parent = os.path.join(parent, 'src')
+            path = os.path.join(parent, 'token.txt')
+            path = os.path.expandvars(os.path.expanduser(path))
+            mock_io.assert_called_once_with(path, mode='r', encoding='utf-8')
             self.assertEqual(actual, test_data)
     @patch("builtins.open", MagicMock(side_effect=Exception()))
     def test_token_except(self):
