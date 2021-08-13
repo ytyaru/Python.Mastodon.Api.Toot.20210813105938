@@ -51,14 +51,14 @@ class Api:
     @property
     def Auth(self): return self.__auth
     @property
-    def BaseUrl(self, domain=None):
-        candidates = [domain, FileReader.text(Path.here('host.txt')), 'mstdn.jp']
+    def BaseUrl(self):
+        candidates = [FileReader.text(Path.here('host.txt')), 'mstdn.jp']
         hosts = [c for c in candidates if c is not None]
         return f'https://{hosts[0]}/'
     @property
     def Header(self):
         return {
-            'User-Agent': 'Mozilla/5.0 (X11; CrOS armv7l 13597.84.0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/88.0.4324.187 Safari/537.36',
+            'User-Agent': FileReader.text('user-agent.txt'),
 #            'Content-Type': 'application/json',
             'Authorization': f'Bearer {self.Auth.Token}',
         }
