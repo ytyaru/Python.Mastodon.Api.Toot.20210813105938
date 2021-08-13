@@ -1,0 +1,22 @@
+Mastodon APIで画像・音声・動画をアップロードする。	${version}
+Usage:
+  ${this} [-h] [-v] [-t thumbnail] [-d description] [-f focus] [FILE...]
+SubCommand:
+  h help     ヘルプを表示する。
+  v version  バージョンを表示する。
+  l license  ライセンスを表示する。
+  u url      URLを表示する。
+Parameters:
+  required:
+    $$1              ファイルパス。
+  options:
+    -t thumbnail    サムネイル画像パス。
+    -d description  説明文。
+    -f focus        画像のフォーカス。WIDTH,HEIGH
+Documents:
+  https://docs.joinmastodon.org/methods/statuses/media/
+  https://docs.joinmastodon.org/methods/statuses/
+Examples:
+  ${this} img.png
+  ${this} -t thumbnail.png -d '画像の説明文。' -f 40,30 img.png
+  echo -e 'MSG1\nMSG2\nMSG3' | ${this} 
