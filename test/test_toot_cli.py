@@ -11,20 +11,29 @@ sys.path.append(os.path.join(os.path.dirname(__file__), '../src'))
 from lib import exept_null, Path, FileReader, FileWriter, Authenticator, Api
 import toot
 import unittest
+from test.support import captured_stdout
 from unittest.mock import MagicMock, patch, mock_open
 import copy
-class TestTootApp(unittest.TestCase):
-    def test_version(self):
-        self.assertEqual(toot.App.version(), '0.0.1')
-    def test_help(self):
-        self.assertEqual(toot.App.help().splitlines()[0], 'MastodonのAPIを叩いてTootする。	0.0.1')
-    def test_toot(self):
-        # https://docs.joinmastodon.org/methods/statuses/
-        test_data = {"id": "1234", "created_at":"2020-01-01T00:00:00+0900", "content":"<p>テスト内容。</p>"}
-        DummyApp = copy.deepcopy(toot.App)
-        DummyApp.toot = MagicMock(return_value=test_data) 
-        self.assertEqual(DummyApp.toot(''), test_data)
-        self.assertEqual(DummyApp.toot('')['id'], '1234')
+
+class TestTootCli(unittest.TestCase):
+    def test_run(self):
+        this = 'toot.py'
+        version = '0.0.1'
+        expected = '''MastodonのAPIを叩いてTootする。	{version}
+Usage:
+  {this} [-h] [-v] [MESSAGE ...]
+Documents:
+  https://docs.joinmastodon.org/methods/statuses/
+Examples:
+  {this} MSG1 MSG2 MSG3
+  echo -e 'MSG1\nMSG2\nMSG3' | {this}'''
+        with self.assertRaises(SystemExit) as exit:
+            with captured_stdout() as stdout:
+                sys.argv.append('-h')
+                toot.Cli().run()
+                result = stdout.getvalue()
+                self.assertEqual(result, expected)
+        self.assertEqual(exit.exception.code, 0)
 
 if __name__ == "__main__":
     unittest.main()
