@@ -1,9 +1,0 @@
-name = 'MIT'
-url = 'https://choosealicense.com/licenses/mit/'
-[id]
-spdx = 'MIT'
-github = 'mit'
-[url]
-opensource = 'https://opensource.org/licenses/MIT'
-spdx = 'https://spdx.org/licenses/MIT.html'
-github = 'https://choosealicense.com/licenses/mit/'

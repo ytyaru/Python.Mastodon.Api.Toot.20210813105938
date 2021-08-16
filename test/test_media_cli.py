@@ -24,26 +24,35 @@ class TestMediaCli(unittest.TestCase):
         version = '0.0.1'
         Target = namedtuple('Target', 'name path version')
         self.target = Target(name, path, version)
-    def test_run_version(self):
+    def test_run_zero_pos_args(self):
         sys.argv.clear()
         sys.argv.append(self.target)
-        sys.argv.append('-v')
-        with self.assertRaises(SystemExit) as exit:
-            mock_lib = MagicMock()
-            with patch('media.App.version', return_value=mock_lib):
-                media.Cli().run()
-                mock_lib.assert_called_once()
-        self.assertEqual(exit.exception.code, 0)
-    def test_run_help(self):
-        sys.argv.clear()
-        sys.argv.append(self.target)
-        sys.argv.append('-h')
         with self.assertRaises(SystemExit) as exit:
             mock_lib = MagicMock()
             with patch('media.App.help', return_value=mock_lib):
                 media.Cli().run()
                 mock_lib.assert_called_once()
         self.assertEqual(exit.exception.code, 0)
+    def test_run_subcommands(self):
+        test_cases = {
+            'media.App.version': ['-v', 'v', 'version'],
+            'media.App.help': ['-h', 'h', 'help'],
+            'media.App.license': ['l', 'license'],
+            'media.App.author': ['a', 'author'],
+            'media.App.url': ['u', 'url'],
+        }
+        for called_method, args in test_cases.items():
+            for arg in args:
+                with self.subTest(arg=arg):
+                    sys.argv.clear()
+                    sys.argv.append(self.target)
+                    sys.argv.append(arg)
+                    with self.assertRaises(SystemExit) as exit:
+                        mock_lib = MagicMock()
+                        with patch(called_method, return_value=mock_lib):
+                            media.Cli().run()
+                            mock_lib.assert_called_once()
+                    self.assertEqual(exit.exception.code, 0)
     def test_run_media(self):
         sys.argv.clear()
         sys.argv.append(self.target)
@@ -54,6 +63,69 @@ class TestMediaCli(unittest.TestCase):
                 media.Cli().run()
                 mock_lib.assert_called_once()
         self.assertEqual(exit.exception.code, 0)
+
+    """
+    def test_run_version(self):
+        for arg in ['-v', 'v', 'version']:
+            with self.subTest(arg=arg):
+                sys.argv.clear()
+                sys.argv.append(self.target)
+                sys.argv.append(arg)
+                with self.assertRaises(SystemExit) as exit:
+                    mock_lib = MagicMock()
+                    with patch('media.App.version', return_value=mock_lib):
+                        media.Cli().run()
+                        mock_lib.assert_called_once()
+                self.assertEqual(exit.exception.code, 0)
+    def test_run_help(self):
+        for arg in ['-h', 'h', 'help']:
+            with self.subTest(arg=arg):
+                sys.argv.clear()
+                sys.argv.append(self.target)
+                sys.argv.append(arg)
+                with self.assertRaises(SystemExit) as exit:
+                    mock_lib = MagicMock()
+                    with patch('media.App.help', return_value=mock_lib):
+                        media.Cli().run()
+                        mock_lib.assert_called_once()
+                self.assertEqual(exit.exception.code, 0)
+    def test_run_license(self):
+        for arg in ['l', 'license']:
+            with self.subTest(arg=arg):
+                sys.argv.clear()
+                sys.argv.append(self.target)
+                sys.argv.append(arg)
+                with self.assertRaises(SystemExit) as exit:
+                    mock_lib = MagicMock()
+                    with patch('media.App.license', return_value=mock_lib):
+                        media.Cli().run()
+                        mock_lib.assert_called_once()
+                self.assertEqual(exit.exception.code, 0)
+    def test_run_author(self):
+        for arg in ['a', 'author']:
+            with self.subTest(arg=arg):
+                sys.argv.clear()
+                sys.argv.append(self.target)
+                sys.argv.append(arg)
+                with self.assertRaises(SystemExit) as exit:
+                    mock_lib = MagicMock()
+                    with patch('media.App.author', return_value=mock_lib):
+                        media.Cli().run()
+                        mock_lib.assert_called_once()
+                self.assertEqual(exit.exception.code, 0)
+    def test_run_url(self):
+        for arg in ['u', 'url']:
+            with self.subTest(arg=arg):
+                sys.argv.clear()
+                sys.argv.append(self.target)
+                sys.argv.append(arg)
+                with self.assertRaises(SystemExit) as exit:
+                    mock_lib = MagicMock()
+                    with patch('media.App.url', return_value=mock_lib):
+                        media.Cli().run()
+                        mock_lib.assert_called_once()
+                self.assertEqual(exit.exception.code, 0)
+    """
 
 if __name__ == "__main__":
     unittest.main()

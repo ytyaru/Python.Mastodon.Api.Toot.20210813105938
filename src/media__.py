@@ -7,7 +7,6 @@ from lib import exept_null, Path, FileReader, FileWriter, Authenticator, Api
 from abc import ABCMeta, abstractmethod
 import mimetypes
 import toml
-import copy
 # https://docs.joinmastodon.org/ja/user/posting/#attachments
 class Limit(metaclass=ABCMeta):
     @abstractmethod
@@ -51,11 +50,16 @@ class Media(Api):
         print(res.text, file=sys.stderr)
         return res.json()
     def __file_tuple(self, path):
-#        return (path, open(path,'rb').read(), mimetypes.guess_type(path)[0])
-        with open(path, 'rb') as f: return (path, f.read(), mimetypes.guess_type(path)[0])
+        return (path, open(path,'rb').read(), mimetypes.guess_type(path)[0])
 class App:
+    def __init__(self):
+        with open('app.toml') as f: self.__app = toml.load(f)
+        with open('author.toml') as f: self.__author = toml.load(f)
+        with open('license.toml') as f: self.__license = toml.load(f)
+        with open('readme.toml') as f: self.__readme = toml.load(f)
     @classmethod
-    def version(self): return '0.0.1'
+    def version(self): return self.__app['version']
+#    def version(self): return '0.0.1'
 #    def version(self): return FileReader.text(Path.here('version-media.txt'))
     @classmethod
     def help(self):
@@ -63,65 +67,42 @@ class App:
         return t.substitute(this=Path.name(__file__), version=self.version())
     @classmethod
     def since(self):
-        return datetime.datetime(2021, 8, 12, 0, 0, 0, 0, tzinfo=datetime.timezone(datetime.timedelta(hours=9)))
+        return datetime.datetime.fromisoformat(self.__app['created_at'])
+#        return datetime.datetime(2021, 8, 12, 0, 0, 0, 0, tzinfo=datetime.timezone(datetime.timedelta(hours=9)))
     @classmethod
     def author(self):
-        a = {}
-        a['name'] = 'ytyaru'
-        a['url'] = f'https://github.com/{a["name"]}'
-        return a
+#        a = {}
+#        a['name'] = 'ytyaru'
+#        a['url'] = f'https://github.com/{a["name"]}'
+#        return a
+        return self.__author
     @classmethod
     def copyright(self): return f'© {App.since().year} {App.author()["name"]}'
+#    def copyright(self): return f'© {App.since().year} {App.author()["name"]}'
     @classmethod
     def license(self):
-        l = {}
-        l['name'] = 'MIT'
-        l['spdx'] = l['name']
-        l['url'] = 'https://opensource.org/licenses/MIT'
-        return l
+#        l = {}
+#        l['name'] = 'MIT'
+#        l['spdx'] = l['name']
+#        l['url'] = 'https://opensource.org/licenses/MIT'
+#        return l
+        return self.__license
     @classmethod
-    def url(self): return 'https://github.com/ytyaru/Python.Mastodon.Api.Toot.20210812120350'
+    def url(self): return self.__app['url']
+#    def url(self): return 'https://github.com/ytyaru/Python.Mastodon.Api.Toot.20210812120350'
     @classmethod
     def media(self, *args, **kwargs): return json.dumps(Media().media(*args, **kwargs))
-class ArgParser:
-    def parse(self):
-        args = []
-        kwargs = {}
-        optionals = {'-t': 'thumbnail',
-                     '-d': 'description',
-                     '-f': 'focus'}
-        if 2 == len(sys.argv): args.append(sys.argv[1])
-        else:
-            argv = copy.deepcopy(sys.argv[1:])
-            for i, arg in enumerate(argv):
-                opt = list(filter(lambda o: o == arg, optionals))
-                if 0 == len(opt): continue
-                opt = opt[0]
-                if (i+1 < len(argv) - 1): raise Exception(f'引数不足。オプション引数{opt}には値が必要です。')
-                kwargs.append(optionals[opt], argv[i+1])
-            args.append(argv[0] if 0 == len(list(filter(lambda o: o == argv[0], optionals))) else argv[-1])
-#        if not os.path.isfile(args[0]): raise Exception(f'引数不正。指定したファイルは存在しません。{args[0]}')
-        return args, kwargs
 class Cli:
     def __cmd(self, text):
         print(text)
         sys.exit(0)
-    def __get_content(self): return ArgParser().parse()
+    def __get_content(self):
+        if 1 < len(sys.argv): return '\n'.join(sys.argv[1:])
+        else: return sys.stdin.read().rstrip('\n')
     def __parse(self):
-        if 1 == len(sys.argv): self.__cmd(App.help())
-        elif 1 < len(sys.argv):
+        if 1 < len(sys.argv):
             if   '-h' == sys.argv[1]: self.__cmd(App.help())
-            elif 'h' == sys.argv[1]: self.__cmd(App.help())
-            elif 'help' == sys.argv[1]: self.__cmd(App.help())
             elif '-v' == sys.argv[1]: self.__cmd(App.version())
-            elif 'v' == sys.argv[1]: self.__cmd(App.version())
-            elif 'version' == sys.argv[1]: self.__cmd(App.version())
-            elif 'l' == sys.argv[1]: self.__cmd(App.license()['name'])
-            elif 'license' == sys.argv[1]: self.__cmd(App.license()['name'])
-            elif 'a' == sys.argv[1]: self.__cmd(App.author()['name'])
-            elif 'author' == sys.argv[1]: self.__cmd(App.author()['name'])
-            elif 'u' == sys.argv[1]: self.__cmd(App.url())
-            elif 'url' == sys.argv[1]: self.__cmd(App.url())
         self.__cmd(App.media(self.__get_content()))
     def run(self): self.__parse()
 if __name__ == "__main__":
