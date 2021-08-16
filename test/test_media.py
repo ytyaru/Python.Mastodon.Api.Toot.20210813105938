@@ -12,11 +12,23 @@ import media
 import unittest
 from unittest.mock import MagicMock
 import copy
+from collections import namedtuple
+from string import Template
 class TestMediaApp(unittest.TestCase):
+    def setUp(self):
+        parent = os.path.join(os.path.dirname(__file__), '../src')
+        name = 'media.py'
+        path = os.path.abspath(os.path.join(parent, name))
+        version = '0.0.1'
+        Target = namedtuple('Target', 'name path version')
+        self.target = Target(name, path, version)
     def test_version(self):
-        self.assertEqual(media.App.version(), '0.0.1')
+        self.assertEqual(media.App.version(), self.target.version)
     def test_help(self):
-        self.assertEqual(media.App.help().splitlines()[0], f'Mastodon APIで画像・音声・動画をアップロードする。	{media.App.version()}')
+        path = os.path.join(os.path.dirname(__file__), '../src/help/media.txt')
+        t = Template(FileReader.text(path))
+        expected = t.substitute(this=self.target.name, version=self.target.version)
+        self.assertEqual(media.App.help(), expected)
     def test_since(self):
         self.assertEqual(media.App.since(), datetime.datetime(2021, 8, 12, 0, 0, 0, 0, tzinfo=datetime.timezone(datetime.timedelta(hours=9))))
     def test_author(self):

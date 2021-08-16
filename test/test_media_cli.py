@@ -11,54 +11,46 @@ sys.path.append(os.path.join(os.path.dirname(__file__), '../src'))
 from lib import exept_null, Path, FileReader, FileWriter, Authenticator, Api
 import media
 import unittest
-from test.support import captured_stdout
+#from test.support import captured_stdout
 from unittest.mock import MagicMock, patch, mock_open
 import copy
-
-class TestTootCli(unittest.TestCase):
+from collections import namedtuple
+from string import Template
+class TestMediaCli(unittest.TestCase):
     def setUp(self):
         parent = os.path.join(os.path.dirname(__file__), '../src')
-        self.target = os.path.abspath(os.path.join(parent, 'media.py'))
-    def test_run_version(self):
-        this = 'media.py'
+        name = 'toot.py'
+        path = os.path.abspath(os.path.join(parent, name))
         version = '0.0.1'
+        Target = namedtuple('Target', 'name path version')
+        self.target = Target(name, path, version)
+    def test_run_version(self):
+        sys.argv.clear()
+        sys.argv.append(self.target)
+        sys.argv.append('-v')
         with self.assertRaises(SystemExit) as exit:
-            with captured_stdout() as stdout:
-                sys.argv.clear()
-                sys.argv.append(self.target)
-                sys.argv.append('-v')
+            mock_lib = MagicMock()
+            with patch('media.App.version', return_value=mock_lib):
                 media.Cli().run()
-                result = stdout.getvalue()
-                self.assertEqual(result, expected)
+                mock_lib.assert_called_once()
         self.assertEqual(exit.exception.code, 0)
     def test_run_help(self):
-        this = 'media.py'
-        version = '0.0.1'
-        expected = '''MastodonのAPIを叩いてTootする。	{version}
-Usage:
-  {this} [-h] [-v] [MESSAGE ...]
-Documents:
-  https://docs.joinmastodon.org/methods/statuses/
-Examples:
-  {this} MSG1 MSG2 MSG3
-  echo -e 'MSG1\nMSG2\nMSG3' | {this}'''
+        sys.argv.clear()
+        sys.argv.append(self.target)
+        sys.argv.append('-h')
         with self.assertRaises(SystemExit) as exit:
-            with captured_stdout() as stdout:
-                sys.argv.clear()
-                sys.argv.append(self.target)
-                sys.argv.append('-h')
+            mock_lib = MagicMock()
+            with patch('media.App.help', return_value=mock_lib):
                 media.Cli().run()
-                result = stdout.getvalue()
-                self.assertEqual(result, expected)
+                mock_lib.assert_called_once()
         self.assertEqual(exit.exception.code, 0)
     def test_run_media(self):
-        mock_lib = MagicMock()
+        sys.argv.clear()
+        sys.argv.append(self.target)
+        sys.argv.append('test.png')
         with self.assertRaises(SystemExit) as exit:
+            mock_lib = MagicMock()
             with patch('media.App.media', return_value=mock_lib):
-                sys.argv.clear()
-                sys.argv.append(self.target)
-                sys.argv.append('test.png')
-                self.assertEqual(sys.argv[1], 'test.png')
                 media.Cli().run()
                 mock_lib.assert_called_once()
         self.assertEqual(exit.exception.code, 0)

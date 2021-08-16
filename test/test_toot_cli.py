@@ -11,28 +11,47 @@ sys.path.append(os.path.join(os.path.dirname(__file__), '../src'))
 from lib import exept_null, Path, FileReader, FileWriter, Authenticator, Api
 import toot
 import unittest
-from test.support import captured_stdout
+#from test.support import captured_stdout
 from unittest.mock import MagicMock, patch, mock_open
 import copy
-
+from collections import namedtuple
 class TestTootCli(unittest.TestCase):
-    def test_run(self):
-        this = 'toot.py'
+    def setUp(self):
+        parent = os.path.join(os.path.dirname(__file__), '../src')
+        name = 'toot.py'
+        path = os.path.abspath(os.path.join(parent, name))
         version = '0.0.1'
-        expected = '''MastodonのAPIを叩いてTootする。	{version}
-Usage:
-  {this} [-h] [-v] [MESSAGE ...]
-Documents:
-  https://docs.joinmastodon.org/methods/statuses/
-Examples:
-  {this} MSG1 MSG2 MSG3
-  echo -e 'MSG1\nMSG2\nMSG3' | {this}'''
+        Target = namedtuple('Target', 'name path version')
+        self.target = Target(name, path, version)
+    def test_run_version(self):
+        sys.argv.clear()
+        sys.argv.append(self.target.path)
+        sys.argv.append('-v')
         with self.assertRaises(SystemExit) as exit:
-            with captured_stdout() as stdout:
-                sys.argv.append('-h')
+            mock_lib = MagicMock()
+            with patch('toot.App.version', return_value=mock_lib):
                 toot.Cli().run()
-                result = stdout.getvalue()
-                self.assertEqual(result, expected)
+                mock_lib.assert_called_once()
+        self.assertEqual(exit.exception.code, 0)
+    def test_run_help(self):
+        sys.argv.clear()
+        sys.argv.append(self.target.path)
+        sys.argv.append('-h')
+        with self.assertRaises(SystemExit) as exit:
+            mock_lib = MagicMock()
+            with patch('toot.App.help', return_value=mock_lib):
+                toot.Cli().run()
+                mock_lib.assert_called_once()
+        self.assertEqual(exit.exception.code, 0)
+    def test_run_toot(self):
+        sys.argv.clear()
+        sys.argv.append(self.target.path)
+        sys.argv.append('test.png')
+        mock_lib = MagicMock()
+        with self.assertRaises(SystemExit) as exit:
+            with patch('toot.App.toot', return_value=mock_lib):
+                toot.Cli().run()
+                mock_lib.assert_called_once()
         self.assertEqual(exit.exception.code, 0)
 
 if __name__ == "__main__":

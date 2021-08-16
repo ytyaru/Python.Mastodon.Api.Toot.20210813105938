@@ -13,11 +13,23 @@ import toot
 import unittest
 from unittest.mock import MagicMock, patch, mock_open
 import copy
+from collections import namedtuple
+from string import Template
 class TestTootApp(unittest.TestCase):
+    def setUp(self):
+        parent = os.path.join(os.path.dirname(__file__), '../src')
+        name = 'toot.py'
+        path = os.path.abspath(os.path.join(parent, name))
+        version = '0.0.1'
+        Target = namedtuple('Target', 'name path version')
+        self.target = Target(name, path, version)
     def test_version(self):
-        self.assertEqual(toot.App.version(), '0.0.1')
+        self.assertEqual(toot.App.version(), self.target.version)
     def test_help(self):
-        self.assertEqual(toot.App.help().splitlines()[0], 'MastodonのAPIを叩いてTootする。	0.0.1')
+        path = os.path.join(os.path.dirname(__file__), '../src/help/toot.txt')
+        t = Template(FileReader.text(path))
+        expected = t.substitute(this=self.target.name, version=self.target.version)
+        self.assertEqual(toot.App.help(), expected)
     def test_toot(self):
         # https://docs.joinmastodon.org/methods/statuses/
         test_data = {"id": "1234", "created_at":"2020-01-01T00:00:00+0900", "content":"<p>テスト内容。</p>"}
