@@ -27,7 +27,13 @@ class TestToot(unittest.TestCase):
             self.assertEqual(actual, f'https://{test_data}/')
             self.assertEqual(toot.Toot().ApiUrl, f'https://{test_data}/api/v1/statuses')
     def test_toot(self):
-        pass
+        # https://docs.joinmastodon.org/methods/statuses/
+        test_data = {"id": "1234", "created_at":"2020-01-01T00:00:00+0900", "content":"<p>テスト内容。</p>"}
+        t = toot.Toot()
+        t.toot = MagicMock(return_value=test_data) 
+        self.assertEqual(t.toot(), test_data)
+        self.assertEqual(t.toot()['id'], '1234')
+
 
 if __name__ == "__main__":
     unittest.main()
