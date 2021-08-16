@@ -33,31 +33,32 @@ Linux raspberrypi 5.10.52-v7l+ #1441 SMP Tue Aug 3 18:11:56 BST 2021 armv7l GNU/
 
 # インストール
 
-　3.7以上のPythonをインストールする。
-
-　次に以下のように[pyxel][]をインストールする。
-
-* [pyxel/README](https://github.com/kitao/pyxel/blob/master/README.ja.md#%E3%82%A4%E3%83%B3%E3%82%B9%E3%83%88%E3%83%BC%E3%83%AB%E6%96%B9%E6%B3%95)
-
 ```sh
-sudo apt install python3 python3-pip libsdl2-dev libsdl2-image-dev
-git clone https://github.com/kitao/pyxel.git
-cd pyxel
-make -C pyxel/core clean all
-pip3 install .
+pip3 install -r requirements.txt
 ```
 
 # 使い方
 
+## アクセストークンを用意する
+
+1. Mastodonの任意インスタンスでアカウントをつくる
+1. メニューの`開発`から`アプリ`をつくる
+1. アクセストークンを生成する
+
 ```sh
 git clone https://github.com/ytyaru/Python.Mastodon.Api.Toot.20210813105938
 cd Python.Mastodon.Api.Toot.20210813105938/src
-./run.py
+echo '＜生成したアクセストークン＞' > token.txt
 ```
 
-# 注意
+## Tootする
 
-* 注意点など
+```sh
+./toot.py 'Toot本文。'
+```
+```sh
+echo -e 'Toot本文。\n#hashtag' | ./toot.py
+```
 
 # 著者
 

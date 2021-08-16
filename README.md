@@ -33,18 +33,8 @@ Linux raspberrypi 5.10.52-v7l+ #1441 SMP Tue Aug 3 18:11:56 BST 2021 armv7l GNU/
 
 # Installation
 
-Install Python 3.7 or higher.
-
-Next, install [pyxel][] as follows.
-
-* [pyxel/README](https://github.com/kitao/pyxel/blob/master/README.md#how-to-install)
-
 ```sh
-sudo apt install python3 python3-pip libsdl2-dev libsdl2-image-dev
-git clone https://github.com/kitao/pyxel.git
-cd pyxel
-make -C pyxel/core clean all
-pip3 install .
+pip3 install -r requirements.txt
 ```
 
 # Usage
@@ -55,9 +45,26 @@ cd Python.Mastodon.Api.Toot.20210813105938/src
 ./run.py
 ```
 
-# Note
+## Prepare an access token
 
-* important point
+1. Create an account on any instance of Mastodon
+1. Create a `app` from the `development` of the menu
+1. Generate an access token
+
+`` `sh
+git clone https://github.com/ytyaru/Python.Mastodon.Api.Toot.20210813105938
+cd Python.Mastodon.Api.Toot.20210813105938/src
+echo "$GENERATED_ACCESS_TOKEN" > token.txt
+`` ```
+
+## Toot
+
+```sh
+./toot.py 'Toot body.'
+```
+```sh
+echo -e 'Toot body.\n#hashtag'| ./toot.py
+```
 
 # Author
 
