@@ -25,7 +25,7 @@ class App:
     @classmethod
     def help(self):
         t = Template(FileReader.text(Path.here('help/toot.txt')))
-        return t.substitute(this=Path.this_name(), version=self.version())
+        return t.substitute(this=Path.name(__file__), version=self.version())
     @classmethod
     def toot(self, content): return json.dumps(Toot().toot(content))
 class Cli:

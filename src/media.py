@@ -57,7 +57,7 @@ class App:
     @classmethod
     def help(self):
         t = Template(FileReader.text(Path.here('help/media.txt')))
-        return t.substitute(this=Path.this_name(), version=self.version())
+        return t.substitute(this=Path.name(__file__), version=self.version())
     @classmethod
     def since(self):
         return datetime.datetime(2021, 8, 12, 0, 0, 0, 0, tzinfo=datetime.timezone(datetime.timedelta(hours=9)))
