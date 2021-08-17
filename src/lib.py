@@ -4,6 +4,7 @@ import requests
 import os, sys, argparse, json, urllib.parse, datetime
 from string import Template
 import inspect
+from collections import namedtuple
 def exept_null(f):
     def _wrapper(*args, **kwargs):
         try: return f(*args, **kwargs)
@@ -74,6 +75,8 @@ class Command:
         with open(path, mode='r', encoding='utf-8') as f:
             t = Template(f.read().rstrip('\n'))
             return t.substitute(this=f'{name}{ext}', version=self.Version)
+#        t = Template(FileReader.text(Path.here('help/toot.txt')))
+#        return t.substitute(this=Path.name(__file__), version=self.version())
     @property
     def Since(self):
         return datetime.datetime(2021, 8, 12, 0, 0, 0, 0, tzinfo=datetime.timezone(datetime.timedelta(hours=9)))
@@ -94,4 +97,18 @@ class Command:
         return l
     @property
     def Url(self): return 'https://github.com/ytyaru/Python.Mastodon.Api.Toot.20210812120350'
+class SubCmdParser:
+    def __init__(self):
+        self.__SubCmd = namedtuple('SubCmd' , 'candidate text')
+        self.__candidates  = []
+    def __cmd(self, text):
+        print(text)
+        sys.exit(0)
+    def __sub_cmd(self, arg, candidate, text):
+        if arg in candidate: self.__cmd(text)
+    def add(self, candidate, text):
+        self.__candidates.append(self.__SubCmd(candidate, text))
+    def parse(self):
+        for c in self.__candidates:
+            self.__sub_cmd(sys.argv[1], c.candidate, c.text)
 

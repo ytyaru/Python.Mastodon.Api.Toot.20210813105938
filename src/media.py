@@ -3,7 +3,7 @@
 import requests
 import os, sys, argparse, json, urllib.parse, datetime
 from string import Template
-from lib import exept_null, Path, FileReader, FileWriter, Authenticator, Api, Command
+from lib import exept_null, Path, FileReader, FileWriter, Authenticator, Api, Command, SubCmdParser
 from abc import ABCMeta, abstractmethod
 import mimetypes
 import toml
@@ -110,38 +110,19 @@ class Cli:
     def __cmd(self, text):
         print(text)
         sys.exit(0)
-    def __sub_cmd(self, arg, candidate, text):
-        if arg in candidate: self.__cmd(text)
     def __get_content(self): return ArgParser().parse()
     def __parse(self):
         if 1 == len(sys.argv): self.__cmd(App().Help)
         elif 1 < len(sys.argv):
-            from collections import namedtuple
-            SubCmd = namedtuple('SubCmd' , 'candidate text')
-            candidates = [
-                SubCmd(['-h', 'h', 'help'], App().Help),
-                SubCmd(['-v', 'v', 'version'], App().Version),
-                SubCmd(['u', 'url'], App().Url),
-                SubCmd(['a', 'author'], App().Author['name']),
-                SubCmd(['s', 'since'], App().Since.isoformat()),
-                SubCmd(['c', 'copyright'], App().Copyright),
-                SubCmd(['l', 'license'], App().License['name']),
-            ]
-            for cmd in candidates: self.__sub_cmd(sys.argv[1], cmd.candidate, cmd.text)
-            """
-            if   '-h' == sys.argv[1]: self.__cmd(App().Help)
-            elif 'h' == sys.argv[1]: self.__cmd(App().Help)
-            elif 'help' == sys.argv[1]: self.__cmd(App().Help)
-            elif '-v' == sys.argv[1]: self.__cmd(App().Version)
-            elif 'v' == sys.argv[1]: self.__cmd(App().Version)
-            elif 'version' == sys.argv[1]: self.__cmd(App().Version)
-            elif 'l' == sys.argv[1]: self.__cmd(App().License['name'])
-            elif 'license' == sys.argv[1]: self.__cmd(App().License['name'])
-            elif 'a' == sys.argv[1]: self.__cmd(App().Author['name'])
-            elif 'author' == sys.argv[1]: self.__cmd(App().Author['name'])
-            elif 'u' == sys.argv[1]: self.__cmd(App().Url)
-            elif 'url' == sys.argv[1]: self.__cmd(App().Url)
-            """
+            parser = SubCmdParser()
+            parser.add(['-h', 'h', 'help'], App().Help)
+            parser.add(['-v', 'v', 'version'], App().Version)
+            parser.add(['u', 'url'], App().Url)
+            parser.add(['a', 'author'], App().Author['name'])
+            parser.add(['s', 'since'], App().Since.isoformat())
+            parser.add(['c', 'copyright'], App().Copyright)
+            parser.add(['l', 'license'], App().License['name'])
+            parser.parse()
         self.__cmd(App().media(self.__get_content()))
     def run(self): self.__parse()
 if __name__ == "__main__":
