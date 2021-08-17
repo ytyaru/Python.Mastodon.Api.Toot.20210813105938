@@ -23,13 +23,36 @@ class TestTootCli(unittest.TestCase):
         version = '0.0.1'
         Target = namedtuple('Target', 'name path version')
         self.target = Target(name, path, version)
+    def test_run_subcommands(self):
+        test_cases = {
+            'toot.App.Version': ['-v', 'v', 'version'],
+            'toot.App.Help': ['-h', 'h', 'help'],
+            'toot.App.Author': ['a', 'author'],
+            'toot.App.Since': ['s', 'since'],
+            'toot.App.Copyright': ['c', 'copyright'],
+            'toot.App.License': ['l', 'license'],
+            'toot.App.Url': ['u', 'url'],
+        }
+        for called_method, args in test_cases.items():
+            for arg in args:
+                with self.subTest(arg=arg):
+                    sys.argv.clear()
+                    sys.argv.append(self.target)
+                    sys.argv.append(arg)
+                    with self.assertRaises(SystemExit) as exit:
+                        mock_lib = MagicMock()
+                        with patch(called_method, return_value=mock_lib):
+                            toot.Cli().run()
+                            mock_lib.assert_called_once()
+                    self.assertEqual(exit.exception.code, 0)
+
     def test_run_version(self):
         sys.argv.clear()
         sys.argv.append(self.target.path)
         sys.argv.append('-v')
         with self.assertRaises(SystemExit) as exit:
             mock_lib = MagicMock()
-            with patch('toot.App.version', return_value=mock_lib):
+            with patch('toot.App.Version', return_value=mock_lib):
                 toot.Cli().run()
                 mock_lib.assert_called_once()
         self.assertEqual(exit.exception.code, 0)
@@ -39,7 +62,7 @@ class TestTootCli(unittest.TestCase):
         sys.argv.append('-h')
         with self.assertRaises(SystemExit) as exit:
             mock_lib = MagicMock()
-            with patch('toot.App.help', return_value=mock_lib):
+            with patch('toot.App.Help', return_value=mock_lib):
                 toot.Cli().run()
                 mock_lib.assert_called_once()
         self.assertEqual(exit.exception.code, 0)

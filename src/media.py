@@ -3,7 +3,7 @@
 import requests
 import os, sys, argparse, json, urllib.parse, datetime
 from string import Template
-from lib import exept_null, Path, FileReader, FileWriter, Authenticator, Api
+from lib import exept_null, Path, FileReader, FileWriter, Authenticator, Api, Command
 from abc import ABCMeta, abstractmethod
 import mimetypes
 import toml
@@ -53,6 +53,9 @@ class Media(Api):
     def __file_tuple(self, path):
 #        return (path, open(path,'rb').read(), mimetypes.guess_type(path)[0])
         with open(path, 'rb') as f: return (path, f.read(), mimetypes.guess_type(path)[0])
+class App(Command):
+    def media(self, *args, **kwargs): return json.dumps(Media().media(*args, **kwargs))
+"""
 class App:
     @classmethod
     def version(self): return '0.0.1'
@@ -83,6 +86,7 @@ class App:
     def url(self): return 'https://github.com/ytyaru/Python.Mastodon.Api.Toot.20210812120350'
     @classmethod
     def media(self, *args, **kwargs): return json.dumps(Media().media(*args, **kwargs))
+"""
 class ArgParser:
     def parse(self):
         args = []
@@ -106,23 +110,39 @@ class Cli:
     def __cmd(self, text):
         print(text)
         sys.exit(0)
+    def __sub_cmd(self, arg, candidate, text):
+        if arg in candidate: self.__cmd(text)
     def __get_content(self): return ArgParser().parse()
     def __parse(self):
-        if 1 == len(sys.argv): self.__cmd(App.help())
+        if 1 == len(sys.argv): self.__cmd(App().Help)
         elif 1 < len(sys.argv):
-            if   '-h' == sys.argv[1]: self.__cmd(App.help())
-            elif 'h' == sys.argv[1]: self.__cmd(App.help())
-            elif 'help' == sys.argv[1]: self.__cmd(App.help())
-            elif '-v' == sys.argv[1]: self.__cmd(App.version())
-            elif 'v' == sys.argv[1]: self.__cmd(App.version())
-            elif 'version' == sys.argv[1]: self.__cmd(App.version())
-            elif 'l' == sys.argv[1]: self.__cmd(App.license()['name'])
-            elif 'license' == sys.argv[1]: self.__cmd(App.license()['name'])
-            elif 'a' == sys.argv[1]: self.__cmd(App.author()['name'])
-            elif 'author' == sys.argv[1]: self.__cmd(App.author()['name'])
-            elif 'u' == sys.argv[1]: self.__cmd(App.url())
-            elif 'url' == sys.argv[1]: self.__cmd(App.url())
-        self.__cmd(App.media(self.__get_content()))
+            from collections import namedtuple
+            SubCmd = namedtuple('SubCmd' , 'candidate text')
+            candidates = [
+                SubCmd(['-h', 'h', 'help'], App().Help),
+                SubCmd(['-v', 'v', 'version'], App().Version),
+                SubCmd(['u', 'url'], App().Url),
+                SubCmd(['a', 'author'], App().Author['name']),
+                SubCmd(['s', 'since'], App().Since.isoformat()),
+                SubCmd(['c', 'copyright'], App().Copyright),
+                SubCmd(['l', 'license'], App().License['name']),
+            ]
+            for cmd in candidates: self.__sub_cmd(sys.argv[1], cmd.candidate, cmd.text)
+            """
+            if   '-h' == sys.argv[1]: self.__cmd(App().Help)
+            elif 'h' == sys.argv[1]: self.__cmd(App().Help)
+            elif 'help' == sys.argv[1]: self.__cmd(App().Help)
+            elif '-v' == sys.argv[1]: self.__cmd(App().Version)
+            elif 'v' == sys.argv[1]: self.__cmd(App().Version)
+            elif 'version' == sys.argv[1]: self.__cmd(App().Version)
+            elif 'l' == sys.argv[1]: self.__cmd(App().License['name'])
+            elif 'license' == sys.argv[1]: self.__cmd(App().License['name'])
+            elif 'a' == sys.argv[1]: self.__cmd(App().Author['name'])
+            elif 'author' == sys.argv[1]: self.__cmd(App().Author['name'])
+            elif 'u' == sys.argv[1]: self.__cmd(App().Url)
+            elif 'url' == sys.argv[1]: self.__cmd(App().Url)
+            """
+        self.__cmd(App().media(self.__get_content()))
     def run(self): self.__parse()
 if __name__ == "__main__":
     Cli().run()

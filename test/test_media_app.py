@@ -25,29 +25,30 @@ class TestMediaApp(unittest.TestCase):
         Target = namedtuple('Target', 'name path version')
         self.target = Target(name, path, version)
     def test_version(self):
-        self.assertEqual(media.App.version(), self.target.version)
+        self.assertEqual(media.App().Version, self.target.version)
     def test_help(self):
         path = os.path.join(os.path.dirname(__file__), '../src/help/media.txt')
         t = Template(FileReader.text(path))
         expected = t.substitute(this=self.target.name, version=self.target.version)
-        self.assertEqual(media.App.help(), expected)
+        self.assertEqual(media.App().Help, expected)
     def test_since(self):
-        self.assertEqual(media.App.since(), datetime.datetime(2021, 8, 12, 0, 0, 0, 0, tzinfo=datetime.timezone(datetime.timedelta(hours=9))))
+        self.assertEqual(media.App().Since, datetime.datetime(2021, 8, 12, 0, 0, 0, 0, tzinfo=datetime.timezone(datetime.timedelta(hours=9))))
     def test_author(self):
-        self.assertEqual(media.App.author(), {'name':'ytyaru', 'url':'https://github.com/ytyaru'})
+        self.assertEqual(media.App().Author, {'name':'ytyaru', 'url':'https://github.com/ytyaru'})
     def test_copyright(self):
-        self.assertEqual(media.App.copyright(), '© 2021 ytyaru')
+        self.assertEqual(media.App().Copyright, '© 2021 ytyaru')
     def test_license(self):
-        self.assertEqual(media.App.license(), {'name':'MIT', 'spdx':'MIT', 'url':'https://opensource.org/licenses/MIT'})
+        self.assertEqual(media.App().License, {'name':'MIT', 'spdx':'MIT', 'url':'https://opensource.org/licenses/MIT'})
     def test_url(self):
-        self.assertEqual(media.App.url(), 'https://github.com/ytyaru/Python.Mastodon.Api.Toot.20210812120350')
+        self.assertEqual(media.App().Url, 'https://github.com/ytyaru/Python.Mastodon.Api.Toot.20210812120350')
     def test_media(self):
         # https://docs.joinmastodon.org/methods/statuses/
         test_data = {"id": "1234", "type":"image", "url":"https://files.test/abc.jpg"}
-        DummyApp = copy.deepcopy(media.App)
-        DummyApp.toot = MagicMock(return_value=test_data) 
-        self.assertEqual(DummyApp.toot(''), test_data)
-        self.assertEqual(DummyApp.toot('')['id'], '1234')
+        app = media.App()
+        app.media = MagicMock(return_value=test_data) 
+        res = app.media('')
+        self.assertEqual(res, test_data)
+        self.assertEqual(res['id'], '1234')
 
 if __name__ == "__main__":
     unittest.main()

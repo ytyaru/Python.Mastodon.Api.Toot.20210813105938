@@ -24,19 +24,19 @@ class TestTootApp(unittest.TestCase):
         Target = namedtuple('Target', 'name path version')
         self.target = Target(name, path, version)
     def test_version(self):
-        self.assertEqual(toot.App.version(), self.target.version)
+        self.assertEqual(toot.App().Version, self.target.version)
     def test_help(self):
         path = os.path.join(os.path.dirname(__file__), '../src/help/toot.txt')
         t = Template(FileReader.text(path))
         expected = t.substitute(this=self.target.name, version=self.target.version)
-        self.assertEqual(toot.App.help(), expected)
+        self.assertEqual(toot.App().Help, expected)
     def test_toot(self):
         # https://docs.joinmastodon.org/methods/statuses/
         test_data = {"id": "1234", "created_at":"2020-01-01T00:00:00+0900", "content":"<p>テスト内容。</p>"}
-        DummyApp = copy.deepcopy(toot.App)
-        DummyApp.toot = MagicMock(return_value=test_data) 
-        self.assertEqual(DummyApp.toot(''), test_data)
-        self.assertEqual(DummyApp.toot('')['id'], '1234')
+        app = toot.App()
+        app.toot = MagicMock(return_value=test_data) 
+        self.assertEqual(app.toot(''), test_data)
+        self.assertEqual(app.toot('')['id'], '1234')
 
 if __name__ == "__main__":
     unittest.main()

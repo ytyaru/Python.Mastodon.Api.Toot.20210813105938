@@ -29,17 +29,19 @@ class TestMediaCli(unittest.TestCase):
         sys.argv.append(self.target)
         with self.assertRaises(SystemExit) as exit:
             mock_lib = MagicMock()
-            with patch('media.App.help', return_value=mock_lib):
+            with patch('media.App.Help', return_value=mock_lib):
                 media.Cli().run()
                 mock_lib.assert_called_once()
         self.assertEqual(exit.exception.code, 0)
     def test_run_subcommands(self):
         test_cases = {
-            'media.App.version': ['-v', 'v', 'version'],
-            'media.App.help': ['-h', 'h', 'help'],
-            'media.App.license': ['l', 'license'],
-            'media.App.author': ['a', 'author'],
-            'media.App.url': ['u', 'url'],
+            'media.App.Version': ['-v', 'v', 'version'],
+            'media.App.Help': ['-h', 'h', 'help'],
+            'media.App.Author': ['a', 'author'],
+            'media.App.Since': ['s', 'since'],
+            'media.App.Copyright': ['c', 'copyright'],
+            'media.App.License': ['l', 'license'],
+            'media.App.Url': ['u', 'url'],
         }
         for called_method, args in test_cases.items():
             for arg in args:
